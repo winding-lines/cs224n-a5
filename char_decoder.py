@@ -48,7 +48,10 @@ class CharDecoder(nn.Module):
         """
         ### YOUR CODE HERE for part 2b
         ### TODO - Implement the forward pass of the character decoder.
-        
+        embeddings = self.decoderCharEmb(input)
+        output, hidden = self.charDecoder(embeddings, dec_hidden) 
+        s_t = self.char_output_projection(output)
+        return (s_t, hidden)
         
         ### END YOUR CODE 
 
