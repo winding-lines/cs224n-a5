@@ -1,0 +1,64 @@
+\documentclass{article}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{graphics}
+\usepackage{amsmath}
+
+\begin{document}
+
+\title{Assignment 5}
+\author{Marius Seritan}
+\maketitle
+
+\section{Character-based convolutional encoder for NMT}
+
+\begin{enumerate}
+
+\item[(a)]{Explain one reason why the embedding size used for character-level embeddings is typically lower than that used for word embeddings}
+
+When using character-level embeddings the size of the vocabulary is smaller than the size of the word-level vocabulary and multiple character embeddings are combined together to build a word. As such the size of each embedding can be smaller.
+
+\item[(b)]{Total number of parameters}
+
+For character-level embeddings the number of parameters is 
+
+$$ N_{char} = V_{char} * e_{char} + e_{word} * e_{char} * k + e_{word} + 2 * (e_{word}*e_{word} + e_{word}) $$
+
+For word-level embeddings the number of parameters is
+
+$$ N_{word} = V_{word} * e_{word} $$
+
+For $k = 5$, $V_{word} = 50000$ and $V_{char} = 96$ and given that $e_{word} \approx 5* e_{char}$ the approximate number of parameters are
+
+$$ N_{char} = 96 * e_{char} + e_{word}^2*e_{char} + e_{word}^2 \approx e_{word}^2*e_{char} $$
+
+$$ N_{word} = 50000 * e_{word} $$
+
+The ratio is 
+
+$$\frac{N_{word}}{N_{char}} = \frac{50000}{e_{word}*e_{char}}$$
+
+For $e_{word} = 256$ and $e_{char} = 50$ there are \textbf{four times as many parameters in the word embeddings as in the character embeddings}.
+
+
+\item[(c)]{One advantage of using a convolutional architecture rather than a recurrent architecture for the character based embedding models}
+
+When a 1d convnet computes features from character embeddings the features are given the same importance no matter where the original characters are placed in the world. This allows the convnet to focus on subwords/n-grams and learn the most relevant sections of the word. In contrast an RNNs always look at the whole world which makes it hard to discard the prefix, for example. Therefore for longer words convnets are more likely to extra the more relevant sub-word which could be specially for languages with joined words.
+
+\item[(d)]{Compare max-pooling and average pooling}
+
+TODO
+
+\end{enumerate}
+
+\clearpage
+
+
+\section{Character-based LSTM decoder for NMT}
+
+BLEU score:
+
+\clearpage
+\section{Analyzing NMT Systems}
+
+\end{document}

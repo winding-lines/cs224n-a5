@@ -111,3 +111,5 @@ bin/
 .vscode/
 vocab.json
 model.bin*
+pyvenv.cfg
+vocab_tiny_*
