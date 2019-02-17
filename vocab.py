@@ -114,10 +114,12 @@ class VocabEntry(object):
         else:
             return self[word]
 
+    def _oneWord2charindices(self, word):
+        return [self.start_of_word] + [self.char2id[c] for c in word] + [self.end_of_word]
+
     def words2charindices(self, sents):
-        """ Convert list of words OR list of sentences of words into
-        list of list of list of character indices.
-        @param sents (list[str] or list[list[str]]): sentence(s) in words
+        """ Convert list of sentences of words into list of list of list of character indices.
+        @param sents (list[list[str]]): sentence(s) in words
         @return word_ids (list[list[list[int]]]): sentence(s) in indices
         """
         ### YOUR CODE HERE for part 1e
@@ -128,14 +130,14 @@ class VocabEntry(object):
         ###
         ###     You must prepend each word with the `start_of_word` character and append 
         ###     with the `end_of_word` character. 
+        return [[self._oneWord2charindices(w) for w in s] for s in sents]
 
 
         ### END YOUR CODE
 
     def words2indices(self, sents):
-        """ Convert list of words or list of sentences of words
-        into list of list of indices.
-        @param sents (list[str] or list[list[str]]): sentence(s) in words
+        """ Convert list of sentences of words into list of list of indices.
+        @param sents (list[list[str]]): sentence(s) in words
         @return word_ids (list[list[int]]): sentence(s) in indices
         """
         return [[self[w] for w in s] for s in sents]
