@@ -23,7 +23,7 @@ def _maxWordInSentence(sentence):
     """
     return max(len(w) for w in sentence) 
 
-def pad_sents_char(sents, char_pad_token):
+def pad_sents_char(sents, char_pad_token, max_word_length=21):
     """ Pad list of sentences according to the longest sentence in the batch and max_word_length.
     @param sents (list[list[list[int]]]): list of sentences, result of `words2charindices()` 
         from `vocab.py`
@@ -35,7 +35,6 @@ def pad_sents_char(sents, char_pad_token):
         Output shape: (batch_size, max_sentence_length, max_word_length)
     """
     # Words longer than 21 characters should be truncated
-    max_word_length = 21 
     sents_padded = []
 
     ### YOUR CODE HERE for part 1f

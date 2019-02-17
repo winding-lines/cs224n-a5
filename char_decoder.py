@@ -31,6 +31,7 @@ class CharDecoder(nn.Module):
         self.charDecoder = nn.LSTM(input_size=char_embedding_size, hidden_size=hidden_size)
         self.char_output_projection = nn.Linear(out_features=len(target_vocab.char2id), in_features=hidden_size)
         self.decoderCharEmb = nn.Embedding(len(target_vocab.char2id), hidden_size, padding_idx=target_vocab.char2id['<pad>'])
+        self.crossEntropyLoss = nn.CrossEntropyLoss(reduction='sum')
         self.target_vocab = target_vocab
 
         ### END YOUR CODE
@@ -69,7 +70,7 @@ class CharDecoder(nn.Module):
         ###
         ### Hint: - Make sure padding characters do not contribute to the cross-entropy loss.
         ###       - char_sequence corresponds to the sequence x_1 ... x_{n+1} from the handout (e.g., <START>,m,u,s,i,c,<END>).
-
+        output, dec_hidden = self.forward(char_sequence, dec_hidden)
 
         ### END YOUR CODE
 

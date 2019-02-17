@@ -162,11 +162,14 @@ class VocabEntry(object):
         ### TODO: 
         ###     Connect `words2charindices()` and `pad_sents_char()` which you've defined in 
         ###     previous parts
-        
-
+        indices = self.words2charindices(sents)
+        padded = pad_sents_char(indices, self.char2id['<pad>'])
+        t = torch.tensor(padded, device=device)
+        t = t.transpose(0,1)
+        return t
         ### END YOUR CODE
 
-    def to_input_tensor(self, sents: List[List[str]], device: torch.device) -> torch.Tensor:
+    def put_tensor(self, sents: List[List[str]], device: torch.device) -> torch.Tensor:
         """ Convert list of sentences (words) into tensor with necessary padding for 
         shorter sentences.
 
@@ -240,7 +243,8 @@ class Vocab(object):
         @param file_path (str): file path to vocab file
         @returns Vocab object loaded from JSON dump
         """
-        entry = json.load(open(file_path, 'r'))
+        with open(file_path, 'r') as f:
+            entry = json.load(f)
         src_word2id = entry['src_word2id']
         tgt_word2id = entry['tgt_word2id']
 
