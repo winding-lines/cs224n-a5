@@ -16,6 +16,13 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+def _maxWordInSentence(sentence):
+    """ Finds the lenght of the longest world in the sentence.
+
+    @param sentence (list[list[str]]): list of words
+    """
+    return max(len(w) for w in sentence) 
+
 def pad_sents_char(sents, char_pad_token):
     """ Pad list of sentences according to the longest sentence in the batch and max_word_length.
     @param sents (list[list[list[int]]]): list of sentences, result of `words2charindices()` 
@@ -29,6 +36,7 @@ def pad_sents_char(sents, char_pad_token):
     """
     # Words longer than 21 characters should be truncated
     max_word_length = 21 
+    sents_padded = []
 
     ### YOUR CODE HERE for part 1f
     ### TODO:
@@ -40,6 +48,21 @@ def pad_sents_char(sents, char_pad_token):
     ###
     ###     You should NOT use the method `pad_sents()` below because of the way it handles 
     ###     padding and unknown words.
+    max_sent_len = max(len(s) for s in sents)
+    # max_word_length = min(max_word_length, max(_maxWordInSentence(s) for s in sents))
+
+    for s in sents:
+        len_s = len(s)
+        s_padded = []
+        for w_i in range(0,max_sent_len):
+            w = s[w_i] if w_i < len_s else []
+            padded = [char_pad_token] * max_word_length
+            len_w = min(max_word_length,len(w))
+            padded[:len_w] = w[:len_w]
+            s_padded.append(padded)
+        
+        # append the padded sentence
+        sents_padded.append(s_padded)
 
 
     ### END YOUR CODE
