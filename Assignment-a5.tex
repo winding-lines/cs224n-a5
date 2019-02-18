@@ -3,6 +3,7 @@
 \usepackage{enumitem}
 \usepackage{graphics}
 \usepackage{amsmath}
+\usepackage{url}
 
 \begin{document}
 
@@ -47,7 +48,36 @@ When a 1d convnet computes features from character embeddings the features are g
 
 \item[(d)]{Compare max-pooling and average pooling}
 
-TODO
+Both pooling layers are generally applied after convolution and allow to reduce the variance and size of the data. For each individual block we pick just one value through pooling. For a given application one pooling method may work better.
+
+In the case of the character based encoding we first use character embeddings to which we apply a convolution and then take the max-pool. The benefits of max-pooling in this approach is that the learned word embedding will focus on the subword that is the most relevant for describing the given word. Max-pooling also beneficial for same reasons when processing images.
+
+One of the benefits of average pooling is that is keeps more information about the overall block. I would consider using average pooling in later parts of an content understanding pipeline, for example to identify which sentence of a paragraph may be more relevant to answer a query.
+
+
+
+\clearpage
+\item[(h)]{Testing for highway network}
+
+In order to test my highway implementation I wrote the \texttt{unittest} based \path{test/highway_test.py} to validate the following use cases
+
+\begin{itemize}
+\item We validated the projection path by setting gate weights to $10.0$ - when passed through the \texttt{sigmoid} this will set the gate to $\approx 1.0$ and disable the skip connection. We used two value for the linear projection weights to $0.3$ and $20.0$, without bias. We validated that when passing $1.0$ as input the output is equal to the projection parameter.
+\item We validated the skip connection by keeping the projection path as above and setting the gate weights to $-10$. The expected output in this case is $1.0$ (equal to the input). Note that we had to reduce the precision from $1e-5$ to $1e-3$.
+\item We tested training of part of the network. For this we adapted the \texttt{polynomial} subproject from the pytorch examples to validate that I can train part of the network - removed the \texttt{relu} layer and setup the gate to positive numbers as above. See the \texttt{run-highway.py} file. The output is
+
+\begin{verbatim}
+==> Actual function:	y = +10.86 x^4 +5.07 x^3 -3.35 x^2 -3.40 x^1 -7.35
+==> Learned projection:	y = +10.93 x^4 +5.11 x^3 -3.37 x^2 -3.40 x^1 -7.42
+==> Learned gate:	y = +1.37 x^4 +4.08 x^3 +2.22 x^2 +3.64 x^1 +4.41
+\end{verbatim}
+
+The one interesting fact is that the gate parameters remained relatively high after the training, otherwise comparing the learned function with the actual one would have been a bit useless.
+
+I believe that the tests above are sufficient because we are only interested to test the highway specific code. More specifically the highway adds a skip connection and the first tests above test the operation with and without this connection. Testing with more complex input would only test \texttt{pytorch} specific code. The additional training use case is an exploration to allow me to get familiar with testing strategies for DNNs.
+
+\end{itemize}
+
 
 \end{enumerate}
 
