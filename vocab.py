@@ -149,6 +149,20 @@ class VocabEntry(object):
         """
         return [self.id2word[w_id] for w_id in word_ids]
 
+    def to_input_tensor(self, sents: List[List[str]], device: torch.device) -> torch.Tensor:
+        """ Convert list of sentences (words) into tensor with necessary padding for 
+        shorter sentences.
+
+        @param sents (List[List[str]]): list of sentences (words)
+        @param device: device on which to load the tesnor, i.e. CPU or GPU
+
+        @returns sents_var: tensor of (max_sentence_length, batch_size)
+        """
+        word_ids = self.words2indices(sents)
+        sents_t = pad_sents(word_ids, self['<pad>'])
+        sents_var = torch.tensor(sents_t, dtype=torch.long, device=device)
+        return torch.t(sents_var)
+
     def to_input_tensor_char(self, sents: List[List[str]], device: torch.device) -> torch.Tensor:
         """ Convert list of sentences (words) into tensor with necessary padding for 
         shorter sentences.
