@@ -4,11 +4,13 @@
 """
 CS224N 2018-19: Homework 5
 """
+
+### YOUR CODE HERE for part 1h
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
-### YOUR CODE HERE for part 1h
+from typing import Optional
 
 class Highway(nn.Module):
     """Highway Networks, Srivastava et al., 2015 https://arxiv.org/abs/1505.00387
@@ -35,14 +37,21 @@ class Highway(nn.Module):
         x_gate = torch.sigmoid(self.gateLinear(input))
         return x_gate * x_proj + (1-x_gate) * input
 
-    def init_for_projection(self):
-        """Initialize the weights so that all the traffic is going through the projection.
+    def initializeWeights(self, projection:Optional[float], gate:float):
+        """Initialize all the weights in the projection and gate level to the same value.
         """
-        torch.nn.init.xavier_uniform(self.projLinear.weight)
+        with torch.no_grad():
+            # initialize the projection layer
+            if projection is None:
+                torch.nn.init.xavier_uniform(self.projLinear.weight)
+            else:
+                self.projLinear.weight.data.fill_(projection)
+                self.projLinear.bias.data.fill_(0.0)
 
-        # when passing through the sigmoid this will set the gate to 1
-        self.gateLinear.weight.data.fill_(3)
-        self.gateLinear.bias.data.fill_(0.0001)
+            # initialize the gate layer
+            self.gateLinear.weight.data.fill_(gate)
+            self.gateLinear.bias.data.fill_(0.0)
+
 
 
 ### END YOUR CODE 

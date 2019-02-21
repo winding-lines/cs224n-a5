@@ -29,17 +29,17 @@ For word-level embeddings the number of parameters is
 
 $$ N_{word} = V_{word} * e_{word} $$
 
-For $k = 5$, $V_{word} = 50000$ and $V_{char} = 96$ and given that $e_{word} \approx 5* e_{char}$ the approximate number of parameters are
+For $k = 5$, $V_{word} = 50000$, $V_{char} = 96$, $e_{word}=256$ and $e_{char}=50$
 
-$$ N_{char} = 96 * e_{char} + e_{word}^2*e_{char} + e_{word}^2 \approx e_{word}^2*e_{char} $$
+$$ N_{char} =  200384 $$
 
-$$ N_{word} = 50000 * e_{word} $$
+$$ N_{word} = 50000 * e_{word} = 12800000$$
 
 The ratio is 
 
-$$\frac{N_{word}}{N_{char}} = \frac{50000}{e_{word}*e_{char}}$$
+$$\frac{N_{word}}{N_{char}} = 63.87$$
 
-For $e_{word} = 256$ and $e_{char} = 50$ there are \textbf{four times as many parameters in the word embeddings as in the character embeddings}.
+For this specific use based there are $\approx 64$ times as many parameters in the word embeddings as in the character embeddings.
 
 
 \item[(c)]{One advantage of using a convolutional architecture rather than a recurrent architecture for the character based embedding models}
@@ -57,13 +57,13 @@ One of the benefits of average pooling is that is keeps more information about t
 
 
 \clearpage
-\item[(h)]{Testing for highway network}
+\item[(h)]{Testing the highway implementation}
 
-In order to test my highway implementation I wrote the \texttt{unittest} based \path{test/highway_test.py} to validate the following use cases
+In order to test my highway implementation I wrote the \texttt{unittest} based \path{test/highway_test.py}. This test class uses a helper method in the \texttt{Highway} instance to set the weights to know values.
 
 \begin{itemize}
-\item We validated the projection path by setting gate weights to $10.0$ - when passed through the \texttt{sigmoid} this will set the gate to $\approx 1.0$ and disable the skip connection. We used two value for the linear projection weights to $0.3$ and $20.0$, without bias. We validated that when passing $1.0$ as input the output is equal to the projection parameter.
-\item We validated the skip connection by keeping the projection path as above and setting the gate weights to $-10$. The expected output in this case is $1.0$ (equal to the input). Note that we had to reduce the precision from $1e-5$ to $1e-3$.
+\item I validated the projection path by setting gate weights to $10.0$ - when passed through the \texttt{sigmoid} this will set the gate to $\approx 1.0$ and disable the skip connection. We used two value for the linear projection weights to $0.3$ and $20.0$, without bias. We validated that when passing $1.0$ as input the output is equal to the projection parameter.
+\item I validated the skip connection by keeping the projection path as above and setting the gate weights to $-10$. The expected output in this case is $1.0$ (equal to the input). Note that we had to reduce the precision from $1e-5$ to $1e-3$.
 \item We tested training of part of the network. For this we adapted the \texttt{polynomial} subproject from the pytorch examples to validate that I can train part of the network - removed the \texttt{relu} layer and setup the gate to positive numbers as above. See the \texttt{run-highway.py} file. The output is
 
 \begin{verbatim}
@@ -75,6 +75,14 @@ In order to test my highway implementation I wrote the \texttt{unittest} based \
 The one interesting fact is that the gate parameters remained relatively high after the training, otherwise comparing the learned function with the actual one would have been a bit useless.
 
 I believe that the tests above are sufficient because we are only interested to test the highway specific code. More specifically the highway adds a skip connection and the first tests above test the operation with and without this connection. Testing with more complex input would only test \texttt{pytorch} specific code. The additional training use case is an exploration to allow me to get familiar with testing strategies for DNNs.
+
+\clearpage
+
+\item[(i)]{Testing the cnn implementation}
+
+In order to test my cnn implementation I wrote the \texttt{unittest} based \path{test/cnn_test.py}. To enable this I wrote a helper method in the \texttt{Cnn} instance to set the weights to know values.
+
+The test compares the implemention against manual testing.
 
 \end{itemize}
 

@@ -3,7 +3,7 @@ from highway import Highway
 
 p = Polynomial(4)
 highway = Highway(4,1, has_relu=False)
-highway.init_for_projection()
+highway.initializeWeights(None, 10)
 batch_idx,loss = p.train(highway,lr=0.1)
 
 print('Loss: {:.6f} after {} batches'.format(loss, batch_idx))
