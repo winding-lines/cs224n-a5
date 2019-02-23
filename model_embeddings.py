@@ -51,7 +51,7 @@ class ModelEmbeddings(nn.Module):
 
         ### YOUR CODE HERE for part 1j
         pad_token_idx = vocab['<pad>']
-        vocab_len = len(vocab)
+        vocab_len = len(vocab.char2id)
         self.embed_size = embed_size
         self.embeddings = nn.Embedding(vocab_len, E_CHAR, padding_idx=pad_token_idx)
         self.cnn = CNN(in_channel=E_CHAR, out_channels=embed_size)

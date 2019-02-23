@@ -179,7 +179,7 @@ class VocabEntry(object):
         indices = self.words2charindices(sents)
         padded = pad_sents_char(indices, self.char2id['<pad>'])
         t = torch.tensor(padded, device=device)
-        t = t.transpose(0,1)
+        t = t.transpose(0,1).contiguous()
         return t
         ### END YOUR CODE
 

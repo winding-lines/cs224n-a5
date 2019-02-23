@@ -7,6 +7,7 @@ CS224N 2018-19: Homework 5
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 class CharDecoder(nn.Module):
     def __init__(self, hidden_size, char_embedding_size=50, target_vocab=None):
@@ -30,8 +31,8 @@ class CharDecoder(nn.Module):
         super(CharDecoder, self).__init__() 
         self.charDecoder = nn.LSTM(input_size=char_embedding_size, hidden_size=hidden_size)
         self.char_output_projection = nn.Linear(out_features=len(target_vocab.char2id), in_features=hidden_size)
-        self.decoderCharEmb = nn.Embedding(len(target_vocab.char2id), hidden_size, padding_idx=target_vocab.char2id['<pad>'])
-        self.crossEntropyLoss = nn.CrossEntropyLoss(reduction='sum')
+        self.decoderCharEmb = nn.Embedding(len(target_vocab.char2id), char_embedding_size, padding_idx=target_vocab.char2id['<pad>'])
+        self.crossEntropyLoss = nn.CrossEntropyLoss(reduction='sum', ignore_index=target_vocab.char2id['<pad>'])
         self.target_vocab = target_vocab
 
         ### END YOUR CODE
@@ -70,8 +71,13 @@ class CharDecoder(nn.Module):
         ###
         ### Hint: - Make sure padding characters do not contribute to the cross-entropy loss.
         ###       - char_sequence corresponds to the sequence x_1 ... x_{n+1} from the handout (e.g., <START>,m,u,s,i,c,<END>).
-        output, dec_hidden = self.forward(char_sequence, dec_hidden)
-
+        input = char_sequence.narrow(0,0,char_sequence.shape[0]-1)
+        target = char_sequence.narrow(0,1,char_sequence.shape[0]-1)
+        output, dec_hidden = self.forward(input, dec_hidden)
+        loss = 0.0
+        for b in range(target.size(0)):
+            loss += self.crossEntropyLoss(output[b, :, :], target[b, :])
+        return loss
         ### END YOUR CODE
 
     def decode_greedy(self, initialStates, device, max_length=21):
@@ -91,7 +97,28 @@ class CharDecoder(nn.Module):
         ###      - Use torch.tensor(..., device=device) to turn a list of character indices into a tensor.
         ###      - We use curly brackets as start-of-word and end-of-word characters. That is, use the character '{' for <START> and '}' for <END>.
         ###        Their indices are self.target_vocab.start_of_word and self.target_vocab.end_of_word, respectively.
-        
-        
+
+        # for each word
+        batch_size =  initialStates[0].size(1)
+        words = [""] * batch_size
+        current = torch.tensor([self.target_vocab.start_of_word] * batch_size)
+
+        # run decode loops until you reach the end of the max word
+        for idx_in_word in range(0,max_length):
+            s_t, initialStates = self(current.unsqueeze(0), initialStates)
+            v,arg_max = F.softmax(s_t, dim=-1).max(dim=-1)
+            for b, index in enumerate(arg_max[0]):
+                current[b] = index
+                if len(words[b]) < idx_in_word:
+                    # this word is already complete
+                    continue
+                index = index.item()
+                if index == self.target_vocab.end_of_word:
+                    # this is the end of word, do not add
+                    # complete words will start to fall behind
+                    continue
+                words[b] += self.target_vocab.id2char[index]
+
+        return words
         ### END YOUR CODE
 
