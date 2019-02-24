@@ -113,3 +113,7 @@ vocab.json
 model.bin*
 pyvenv.cfg
 vocab_tiny_*
+*zip
+pip-selfcheck.json
+lib64
+
