@@ -17,7 +17,8 @@
 
 \item[(a)]{Explain one reason why the embedding size used for character-level embeddings is typically lower than that used for word embeddings}
 
-When using character-level embeddings the size of the vocabulary is smaller than the size of the word-level vocabulary and multiple character embeddings are combined together to build a word. As such the size of each embedding can be smaller.
+When using character-level embeddings the size of the vocabulary is the number of letters, so the overall size will be 100 or less for english. The word word-level vocabulary has to be significantly larger (50k or more) and as such the size of the word embeddings has to be larger.
+\clearpage
 
 \item[(b)]{Total number of parameters}
 
@@ -42,24 +43,30 @@ $$\frac{N_{word}}{N_{char}} = 63.87$$
 For this specific use based there are $\approx 64$ times as many parameters in the word embeddings as in the character embeddings.
 
 
+\clearpage
+
 \item[(c)]{One advantage of using a convolutional architecture rather than a recurrent architecture for the character based embedding models}
 
-When a 1d convnet computes features from character embeddings the features are given the same importance no matter where the original characters are placed in the world. This allows the convnet to focus on subwords/n-grams and learn the most relevant sections of the word. In contrast an RNNs always look at the whole world which makes it hard to discard the prefix, for example. Therefore for longer words convnets are more likely to extra the more relevant sub-word which could be specially for languages with joined words.
+When a 1d convnet computes features from character embeddings the features are given the same importance no matter where the original characters are placed in the word. This allows the convnet to focus on subwords/n-grams and learn the most relevant sections of the word. 
+
+In contrast an RNNs the unit of processing is the whole world. This makes it hard to discard the prefix, for example. 
+
+Therefore for longer words convnets are more likely to extract the more relevant sub-word. This is specially important for languages with joined words (german).
+
+\clearpage
 
 \item[(d)]{Compare max-pooling and average pooling}
 
-Both pooling layers are generally applied after convolution and allow to reduce the variance and size of the data. For each individual block we pick just one value through pooling. For a given application one pooling method may work better.
+Both pooling layers are applied after convolution and allow to reduce the variance and size of the data. For each individual block we pick just one value through pooling. For a given application one pooling method may work better than the other.
 
-In the case of the character based encoding we first use character embeddings to which we apply a convolution and then take the max-pool. The benefits of max-pooling in this approach is that the learned word embedding will focus on the subword that is the most relevant for describing the given word. Max-pooling also beneficial for same reasons when processing images.
+When applied to character based encoding we apply max-pool after the convolution of  character embeddings. The benefits of max-pooling in this approach is that the learned word embedding will focus on the subword that is the most relevant for describing the given word. Max-pooling also beneficial for same reasons when processing images.
 
-One of the benefits of average pooling is that is keeps more information about the overall block. I would consider using average pooling in later parts of an content understanding pipeline, for example to identify which sentence of a paragraph may be more relevant to answer a query.
-
-
+One of the benefits of average pooling is that is keeps more information about the overall block. I would consider using average pooling in later parts of a content understanding pipeline, for example to identify which sentence of a paragraph may be more relevant to answer a query.
 
 \clearpage
 \item[(h)]{Testing the highway implementation}
 
-In order to test my highway implementation I wrote the \texttt{unittest} based \path{test/highway_test.py}. This test class uses a helper method in the \texttt{Highway} instance to set the weights to know values.
+In order to test my highway implementation I wrote tests in \path{test/highway_test.py}. To faciliate reproducible tests I added a helper method in the \texttt{Highway} instance to set the weights to know values.
 
 \begin{itemize}
 \item I validated the projection path by setting gate weights to $10.0$ - when passed through the \texttt{sigmoid} this will set the gate to $\approx 1.0$ and disable the skip connection. We used two value for the linear projection weights to $0.3$ and $20.0$, without bias. We validated that when passing $1.0$ as input the output is equal to the projection parameter.
@@ -82,7 +89,14 @@ I believe that the tests above are sufficient because we are only interested to 
 
 In order to test my cnn implementation I wrote the \texttt{unittest} based \path{test/cnn_test.py}. To enable this I wrote a helper method in the \texttt{Cnn} instance to set the weights to know values.
 
-The test compares the implemention against manual testing.
+The test compares the implementation against manual testing: 
+
+\begin{itemize}
+
+\item using a CNN with 1 input, 1 output and a kernel size of 2
+\item initialize the weights to 1.0 and bias to 0.0
+\item on input $1, 2, 3$ the output should be $3,5$
+\end{itemize}
 
 \end{itemize}
 
@@ -98,5 +112,93 @@ BLEU score:
 
 \clearpage
 \section{Analyzing NMT Systems}
+
+\begin{enumerate}
+
+\item[(a)]{Verb conjugation in spanish}
+
+We examine \texttt{vocab.json} to figure out which of the forms of \texttt{traducir} verb are part of the vocabulary. See results below:
+
+\begin{center}
+\begin{tabular}{l|l}
+\toprule
+Spanish form & Present \\
+\midrule
+traducir & yes\\
+traduzco & no\\
+traduces & no\\
+traduce & yes\\
+traduzca & no\\
+traduzcas & no\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+As we can see $2/3$ of the inputs are missing.
+
+For a word-based NMT system this is a bad situation because the generated output will contain \texttt{<UNK>} words for most of the conjugations of this particular verb. This is likely to apply to all verbs unless we increase the size of the vocabulary many times over.
+
+This situation is improved a lot with character-based models. A character-based NMT will learn embeddings for all the words that are present in the training set. Based on these embeddings the NMT will be able to generate output for both words that are in the training set and also generalize to other words that it has not seen before. The number of unknown words will decrease a lot. 
+
+Note: before taking this class I was not aware of the fact that character embedding perform so well in practice. Many thanks for making me aware of their benefits
+
+\clearpage
+
+\item[(b)]{Word embeddings}
+
+\begin{itemize}
+
+\item[(i)]{Nearest neighbors for Word2Vec 10k}
+
+\begin{center}
+\begin{tabular}{l|l|l}
+\toprule
+Center word & Nearest & Close by\\
+\midrule
+financial & economic & business, markets, banking\\
+neuron & nerve & neural, cells, brain\\
+Francisco & san & jose, diego, antonio\\
+naturally & occurring & readily, humans, arise\\
+expectation & norms & assumptions, policies, inflation\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+
+\item[(ii)]{Nearest neighbors for CharCNN}
+
+\begin{center}
+\begin{tabular}{l|l|l}
+\toprule
+Center word & Nearest & Close by\\
+\midrule
+financial & vertical & informal, physical, cultural\\
+neuron & Newton & George, NBA, Delhi, person\\
+Francisco & France & platform, tissue, Foundation\\
+naturally & practically & typically, significantly, mentally\\
+expectation & exception & indication, integration, separation\\
+
+\bottomrule
+\end{tabular}
+\end{center}
+
+\item[(iii)]{Compare}
+
+Based on the data above Word2Vec models relationships between words where these relationships can be the domain (for \texttt{financial} and \texttt{neuron}), geographical (for francisco), synonyms (\texttt{expectation} and \texttt{norms}) or more general word co-occurrence (\texttt{naturally occurring} is a frequent expression).
+
+
+The CharCNN relationships are a lot more about words having the same shape than the relationships between them. In 3 of the 5 examples above the grouping is done based on prefix (end of the shape). In English this groups together adjectives (\texttt{financial}, \texttt{vertical}), adverbs (\texttt{naturally}, \texttt{practically}) or nouns (\texttt{expectation} and \texttt{exception}) but this grouping superficial - it is not derived from any grammatical knowledge, just shape similarity. The other two groupings seem to be less useful.
+
+
+The differences above can be explained by the training methodology. In the case of Word2Vec we predict how a word will occur based on its context in a sentence and this exposes more complex relationships. In the case of CharCNN the focus is on individual words and the patterns we learn are related to the inner structure.
+\end{itemize}
+
+\clearpage
+
+\item[(c)]{Analyze outputs}
+
+
+\end{enumerate}
+
 
 \end{document}

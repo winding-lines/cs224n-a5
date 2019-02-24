@@ -12,9 +12,8 @@ class CnnTest(unittest.TestCase):
         self.device = torch.device("cpu")
 
     def testForward(self):
-        cnn = CNN(1,1)
-        input = torch.tensor([[[1.0,2.0,3.0,4.0,5.0,6.0]]])
+        cnn = CNN(1,1,2)
+        input = torch.tensor([[[1.0,2.0, 3.0]]])
         cnn.initializeUniform(1.0)
         output = cnn(input)
-        print(f"output {output}")
-        torch.testing.assert_allclose(output, [[[15.3284, 20.3284]]])
+        torch.testing.assert_allclose(output, [[[3.0, 5.0]]], 0.1, 0.1)

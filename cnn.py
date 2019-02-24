@@ -23,6 +23,7 @@ class CNN(nn.Module):
     def initializeUniform(self, value: float):
         with torch.no_grad():
             self.conv1d.weight.data.fill_(value)
+            self.conv1d.bias.data.fill_(0.0)
 
 ### END YOUR CODE
 
