@@ -101,7 +101,7 @@ class CharDecoder(nn.Module):
         # for each word
         batch_size =  initialStates[0].size(1)
         words = [""] * batch_size
-        current = torch.tensor([self.target_vocab.start_of_word] * batch_size)
+        current = torch.tensor([self.target_vocab.start_of_word] * batch_size, device=device)
 
         # run decode loops until you reach the end of the max word
         for idx_in_word in range(0,max_length):
