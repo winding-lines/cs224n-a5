@@ -4,6 +4,7 @@
 \usepackage{graphics}
 \usepackage{amsmath}
 \usepackage{url}
+\usepackage[T1]{fontenc}
 
 \begin{document}
 
@@ -196,6 +197,34 @@ The differences above can be explained by the training methodology. In the case 
 \clearpage
 
 \item[(c)]{Analyze outputs}
+
+Below is an example of an acceptable translation, the character-decoder translates \texttt{colorida} to \texttt{colorful} which is the same as the reference translation.
+
+\begin{enumerate}
+\item \textbf{Spanish source:} Lo que vieron dej claro que el modelo de Kanner era demasiado limitado, pues la realidad del autismo era mucho ms colorida y diversa.
+\item \textbf{Reference translation:} What they saw made clear that Kanner's model was way too narrow,  while the reality of autism was much more colorful and diverse.
+\item \textbf{Assignment 4 model:} What you saw was that the <unk> model was too limited, because the fact of the autism actually was much more \underline{<unk>} and diverse people.
+\item \textbf{Character based model:}  What they saw was clear that Kannel model was too limited, because the reality of autism was much more \underline{colorful} and diverse.
+\end{enumerate}
+
+
+Below is an example of an incorrect translation.
+
+\begin{enumerate}
+\item \textbf{Spanish source:} Un amigo mo hizo eso -- Richard Bollingbroke.
+\item \textbf{Reference translation:} A friend of mine did that -- Richard Bollingbroke.
+\item \textbf{Assignment 4 model:} A friend of mine did that -- Richard \underline{<unk>}
+\item \textbf{Character based model:} A friend of mine did that -- Richard \underline{Bolivia}.
+\end{enumerate}
+
+The character-based model replaced a person's last name (Bollingbroke) with the closest word in the character embedding space (Bolivia). This is an incorrect translation. Some  possible ways to fix this error are:
+
+\begin{itemize}
+
+\item define an identity for unknown words (in word embedding space) and then learn when to copy the word vs using the character-model decoder
+\item check to see if the name exists as a decoded word in the character-based decoder and if so switch to beam search + heuristic
+
+\end{itemize}
 
 
 \end{enumerate}
